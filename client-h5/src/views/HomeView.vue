@@ -1,11 +1,27 @@
 <script setup lang="ts">
+import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { getCurrentUser } from '@/api/auth'
 import MobileShell from '@/components/layout/MobileShell.vue'
 import { useAppStore } from '@/stores/app'
 import { clearToken } from '@/utils/storage'
 
 const appStore = useAppStore()
 const router = useRouter()
+
+onMounted(async () => {
+  if (!appStore.username) {
+    try {
+      const response = await getCurrentUser()
+      appStore.setCurrentUser({
+        username: response.data.username,
+        roleCode: response.data.roleCode,
+      })
+    } catch {
+      goLogin()
+    }
+  }
+})
 
 function goLogin() {
   clearToken()
@@ -19,6 +35,8 @@ function goLogin() {
       <p class="label">系统名称</p>
       <h2>{{ appStore.appName }}</h2>
       <p class="desc">当前项目：{{ appStore.projectName }}</p>
+      <p class="desc">当前账号：{{ appStore.username || '未获取' }}</p>
+      <p class="desc">当前角色：{{ appStore.roleCode || '未获取' }}</p>
       <p class="desc">这是手机端 H5 的最小可运行骨架页面。</p>
     </section>
 

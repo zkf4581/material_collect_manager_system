@@ -1,13 +1,28 @@
 <script setup lang="ts">
+import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { getAdminProfile, logout } from '@/api/auth'
 import { useAppStore } from '@/stores/app'
-import { clearAdminToken } from '@/utils/storage'
 
 const router = useRouter()
 const appStore = useAppStore()
 
-function onLogout() {
-  clearAdminToken()
+onMounted(async () => {
+  if (!appStore.username) {
+    try {
+      const response = await getAdminProfile()
+      appStore.setCurrentUser({
+        username: response.data.username,
+        roleCode: response.data.roleCode,
+      })
+    } catch {
+      onLogout()
+    }
+  }
+})
+
+async function onLogout() {
+  await logout()
   router.replace('/login')
 }
 </script>
@@ -32,6 +47,7 @@ function onLogout() {
         <div>
           <p class="header-label">当前范围</p>
           <strong>{{ appStore.projectScope }}</strong>
+          <p class="header-user">当前账号：{{ appStore.username || '未获取' }} / {{ appStore.roleCode || '未获取' }}</p>
         </div>
         <el-button type="primary" plain @click="onLogout">退出登录</el-button>
       </header>
@@ -103,6 +119,12 @@ function onLogout() {
   margin: 0 0 4px;
   font-size: 12px;
   color: var(--adm-text-muted);
+}
+
+.header-user {
+  margin: 6px 0 0;
+  color: var(--adm-text-muted);
+  font-size: 13px;
 }
 
 .content {

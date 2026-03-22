@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { setToken } from '@/utils/storage'
+import { login } from '@/api/auth'
+import { useAppStore } from '@/stores/app'
 
 const router = useRouter()
 const route = useRoute()
+const appStore = useAppStore()
 
 const form = reactive({
   username: '',
@@ -20,11 +22,22 @@ async function onSubmit() {
     return
   }
   loading.value = true
-  await new Promise((resolve) => setTimeout(resolve, 300))
-  setToken('demo-token')
-  const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/'
-  router.replace(redirect)
-  loading.value = false
+  try {
+    const response = await login({
+      username: form.username,
+      password: form.password,
+    })
+    appStore.setCurrentUser({
+      username: response.data.user.username,
+      roleCode: response.data.user.roleCode,
+    })
+    const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/'
+    router.replace(redirect)
+  } catch (error) {
+    errorText.value = error instanceof Error ? error.message : '登录失败，请稍后重试'
+  } finally {
+    loading.value = false
+  }
 }
 </script>
 
@@ -47,6 +60,7 @@ async function onSubmit() {
           {{ loading ? '登录中...' : '登录' }}
         </button>
       </form>
+      <p class="hint">演示账号：admin / 123456，keeper / 123456，worker01 / 123456</p>
     </div>
   </div>
 </template>
@@ -110,5 +124,12 @@ input {
   margin: 0;
   font-size: 13px;
   color: #d02828;
+}
+
+.hint {
+  margin: 14px 0 0;
+  color: var(--color-muted);
+  font-size: 12px;
+  line-height: 1.6;
 }
 </style>
