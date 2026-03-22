@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.DS_Store
+
+client-h5/node_modules/
+admin-web/node_modules/
+
+server/target/
+server/uploads/
+
+.idea/
+.vscode/
+
+*.log
