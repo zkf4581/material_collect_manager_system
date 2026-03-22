@@ -43,6 +43,10 @@ public class RewardItem {
         return stock;
     }
 
+    public void setStock(Integer stock) {
+        this.stock = stock;
+    }
+
     public String getStatus() {
         return status;
     }

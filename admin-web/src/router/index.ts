@@ -27,6 +27,12 @@ const router = createRouter({
           component: () => import('@/views/recycle/RecycleRecordsView.vue'),
           meta: { title: '回收审核' },
         },
+        {
+          path: 'exchange-orders',
+          name: 'exchange-orders',
+          component: () => import('@/views/exchange/ExchangeOrdersView.vue'),
+          meta: { title: '兑换审核' },
+        },
       ],
     },
   ],

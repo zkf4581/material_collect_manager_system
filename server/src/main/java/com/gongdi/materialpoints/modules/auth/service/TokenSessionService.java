@@ -19,7 +19,8 @@ public class TokenSessionService {
                 appUser.getId(),
                 appUser.getUsername(),
                 appUser.getRoleCode(),
-                appUser.getProjectId()
+                appUser.getProjectId(),
+                appUser.getWorkerId()
         ));
         return token;
     }

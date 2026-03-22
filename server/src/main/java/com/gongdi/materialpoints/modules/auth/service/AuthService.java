@@ -31,7 +31,13 @@ public class AuthService {
         String token = tokenSessionService.createSession(appUser);
         return new LoginResult(
                 token,
-                new CurrentUser(appUser.getId(), appUser.getUsername(), appUser.getRoleCode(), appUser.getProjectId())
+                new CurrentUser(
+                        appUser.getId(),
+                        appUser.getUsername(),
+                        appUser.getRoleCode(),
+                        appUser.getProjectId(),
+                        appUser.getWorkerId()
+                )
         );
     }
 

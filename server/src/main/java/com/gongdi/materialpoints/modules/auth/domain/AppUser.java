@@ -30,6 +30,9 @@ public class AppUser {
     @Column
     private Long projectId;
 
+    @Column
+    private Long workerId;
+
     public Long getId() {
         return id;
     }
@@ -52,5 +55,9 @@ public class AppUser {
 
     public Long getProjectId() {
         return projectId;
+    }
+
+    public Long getWorkerId() {
+        return workerId;
     }
 }

@@ -27,6 +27,18 @@ const router = createRouter({
       component: () => import('@/views/RecycleRecordsView.vue'),
       meta: { title: '回收记录', requiresAuth: true },
     },
+    {
+      path: '/points',
+      name: 'points',
+      component: () => import('@/views/PointsView.vue'),
+      meta: { title: '我的积分', requiresAuth: true },
+    },
+    {
+      path: '/redeem',
+      name: 'redeem',
+      component: () => import('@/views/RedeemView.vue'),
+      meta: { title: '积分兑换', requiresAuth: true },
+    },
   ],
 })
 

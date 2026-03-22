@@ -35,6 +35,14 @@ function goRecycle() {
 function goRecords() {
   router.push('/records')
 }
+
+function goPoints() {
+  router.push('/points')
+}
+
+function goRedeem() {
+  router.push('/redeem')
+}
 </script>
 
 <template>
@@ -51,6 +59,8 @@ function goRecords() {
     <section class="actions">
       <button class="btn-primary" type="button" @click="goRecycle">回收登记</button>
       <button class="btn-secondary" type="button" @click="goRecords">回收记录</button>
+      <button class="btn-secondary" type="button" @click="goPoints">我的积分</button>
+      <button class="btn-secondary" type="button" @click="goRedeem">积分兑换</button>
       <button class="btn-ghost" type="button" @click="goLogin">退出登录</button>
     </section>
   </MobileShell>

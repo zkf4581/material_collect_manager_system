@@ -4,6 +4,7 @@ public record CurrentUser(
         Long id,
         String username,
         String roleCode,
-        Long projectId
+        Long projectId,
+        Long workerId
 ) {
 }

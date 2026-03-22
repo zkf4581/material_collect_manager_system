@@ -43,6 +43,38 @@ public class PointLedger {
         return id;
     }
 
+    public Long getPointAccountId() {
+        return pointAccountId;
+    }
+
+    public Long getWorkerId() {
+        return workerId;
+    }
+
+    public Long getProjectId() {
+        return projectId;
+    }
+
+    public String getBizType() {
+        return bizType;
+    }
+
+    public Long getBizId() {
+        return bizId;
+    }
+
+    public Integer getChangeAmount() {
+        return changeAmount;
+    }
+
+    public Integer getBalanceAfter() {
+        return balanceAfter;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
     public void setPointAccountId(Long pointAccountId) {
         this.pointAccountId = pointAccountId;
     }
