@@ -11,15 +11,24 @@ export async function request<T>(path: string, init?: RequestInit): Promise<ApiR
   const response = await fetch(`${BASE_URL}${path}`, {
     ...init,
     headers: {
-      'Content-Type': 'application/json',
+      ...(init?.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...init?.headers,
     },
   })
 
-  if (!response.ok) {
-    throw new Error(`请求失败：${response.status}`)
+  const data = (await response.json()) as ApiResponse<T>
+
+  if (!response.ok || data.code !== 0) {
+    throw new Error(data.message || `请求失败：${response.status}`)
   }
 
-  return (await response.json()) as ApiResponse<T>
+  return data
+}
+
+export function uploadRequest<T>(path: string, formData: FormData) {
+  return request<T>(path, {
+    method: 'POST',
+    body: formData,
+  })
 }

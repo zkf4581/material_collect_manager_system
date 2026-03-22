@@ -15,6 +15,18 @@ const router = createRouter({
       component: () => import('@/views/LoginView.vue'),
       meta: { title: '登录', requiresAuth: false },
     },
+    {
+      path: '/recycle',
+      name: 'recycle-create',
+      component: () => import('@/views/RecycleCreateView.vue'),
+      meta: { title: '回收登记', requiresAuth: true },
+    },
+    {
+      path: '/records',
+      name: 'recycle-records',
+      component: () => import('@/views/RecycleRecordsView.vue'),
+      meta: { title: '回收记录', requiresAuth: true },
+    },
   ],
 })
 

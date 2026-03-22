@@ -39,6 +39,7 @@ async function onLogout() {
         <a href="javascript:void(0)">项目管理</a>
         <a href="javascript:void(0)">人员管理</a>
         <a href="javascript:void(0)">积分规则</a>
+        <RouterLink to="/recycle-records">回收审核</RouterLink>
       </nav>
     </aside>
 

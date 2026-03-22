@@ -21,6 +21,12 @@ const router = createRouter({
           component: () => import('@/views/dashboard/DashboardView.vue'),
           meta: { title: '工作台' },
         },
+        {
+          path: 'recycle-records',
+          name: 'recycle-records',
+          component: () => import('@/views/recycle/RecycleRecordsView.vue'),
+          meta: { title: '回收审核' },
+        },
       ],
     },
   ],

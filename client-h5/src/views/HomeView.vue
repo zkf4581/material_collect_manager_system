@@ -27,6 +27,14 @@ function goLogin() {
   clearToken()
   router.push('/login')
 }
+
+function goRecycle() {
+  router.push('/recycle')
+}
+
+function goRecords() {
+  router.push('/records')
+}
 </script>
 
 <template>
@@ -41,8 +49,8 @@ function goLogin() {
     </section>
 
     <section class="actions">
-      <button class="btn-primary" type="button">回收登记（占位）</button>
-      <button class="btn-secondary" type="button">我的积分（占位）</button>
+      <button class="btn-primary" type="button" @click="goRecycle">回收登记</button>
+      <button class="btn-secondary" type="button" @click="goRecords">回收记录</button>
       <button class="btn-ghost" type="button" @click="goLogin">退出登录</button>
     </section>
   </MobileShell>
