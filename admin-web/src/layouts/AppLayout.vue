@@ -36,8 +36,9 @@ async function onLogout() {
       </div>
       <nav class="nav">
         <RouterLink to="/">工作台</RouterLink>
-        <a href="javascript:void(0)">项目管理</a>
-        <a href="javascript:void(0)">人员管理</a>
+        <RouterLink to="/projects">项目管理</RouterLink>
+        <RouterLink to="/teams">班组管理</RouterLink>
+        <RouterLink to="/workers">工人管理</RouterLink>
         <RouterLink to="/materials">材料管理</RouterLink>
         <RouterLink to="/point-rules">积分规则</RouterLink>
         <RouterLink to="/recycle-records">回收审核</RouterLink>

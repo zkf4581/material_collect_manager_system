@@ -40,16 +40,34 @@ const router = createRouter({
           meta: { title: '商品管理' },
         },
         {
-          path: 'materials',
-          name: 'materials',
-          component: () => import('@/views/material/MaterialManageView.vue'),
-          meta: { title: '材料管理' },
+          path: 'projects',
+          name: 'projects',
+          component: () => import('@/views/project/ProjectManageView.vue'),
+          meta: { title: '项目管理' },
+        },
+        {
+          path: 'teams',
+          name: 'teams',
+          component: () => import('@/views/team/TeamManageView.vue'),
+          meta: { title: '班组管理' },
+        },
+        {
+          path: 'workers',
+          name: 'workers',
+          component: () => import('@/views/worker/WorkerManageView.vue'),
+          meta: { title: '工人管理' },
         },
         {
           path: 'point-rules',
           name: 'point-rules',
           component: () => import('@/views/rule/PointRuleManageView.vue'),
           meta: { title: '积分规则' },
+        },
+        {
+          path: 'materials',
+          name: 'materials',
+          component: () => import('@/views/material/MaterialManageView.vue'),
+          meta: { title: '材料管理' },
         },
         {
           path: 'reports',
