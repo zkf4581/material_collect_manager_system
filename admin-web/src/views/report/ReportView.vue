@@ -1,18 +1,36 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
-import { getOverviewReport, getRankingReport, type OverviewReport, type RankingItem } from '@/api/report'
+import {
+  getMaterialRankingReport,
+  getOverviewReport,
+  getRankingReport,
+  getRewardRankingReport,
+  type MaterialRankingItem,
+  type OverviewReport,
+  type RankingItem,
+  type RewardRankingItem,
+} from '@/api/report'
 
 const loading = ref(false)
 const overview = ref<OverviewReport | null>(null)
 const rankings = ref<RankingItem[]>([])
+const materialRankings = ref<MaterialRankingItem[]>([])
+const rewardRankings = ref<RewardRankingItem[]>([])
 
 async function loadData() {
   loading.value = true
   try {
-    const [overviewRes, rankingRes] = await Promise.all([getOverviewReport(), getRankingReport()])
+    const [overviewRes, rankingRes, materialRes, rewardRes] = await Promise.all([
+      getOverviewReport(),
+      getRankingReport(),
+      getMaterialRankingReport(),
+      getRewardRankingReport(),
+    ])
     overview.value = overviewRes.data
     rankings.value = rankingRes.data
+    materialRankings.value = materialRes.data
+    rewardRankings.value = rewardRes.data
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '加载报表失败')
   } finally {
@@ -72,6 +90,34 @@ onMounted(loadData)
         <el-table-column prop="balance" label="积分余额" min-width="140" />
       </el-table>
     </el-card>
+
+    <section class="double-grid">
+      <el-card shadow="never">
+        <template #header>
+          <div class="card-title">材料回收排行</div>
+        </template>
+        <el-table :data="materialRankings" v-loading="loading" border>
+          <el-table-column type="index" label="排名" width="70" />
+          <el-table-column prop="materialName" label="材料" min-width="140" />
+          <el-table-column label="数量" min-width="120">
+            <template #default="{ row }">{{ row.totalQuantity }} {{ row.unitCode }}</template>
+          </el-table-column>
+          <el-table-column prop="totalPoints" label="积分" min-width="100" />
+        </el-table>
+      </el-card>
+
+      <el-card shadow="never">
+        <template #header>
+          <div class="card-title">商品兑换排行</div>
+        </template>
+        <el-table :data="rewardRankings" v-loading="loading" border>
+          <el-table-column type="index" label="排名" width="70" />
+          <el-table-column prop="rewardName" label="商品" min-width="140" />
+          <el-table-column prop="totalQuantity" label="兑换数量" min-width="100" />
+          <el-table-column prop="totalPoints" label="兑换积分" min-width="100" />
+        </el-table>
+      </el-card>
+    </section>
   </div>
 </template>
 
@@ -136,8 +182,18 @@ h2 {
   font-weight: 600;
 }
 
+.double-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
 @media (max-width: 1100px) {
   .stats {
+    grid-template-columns: 1fr;
+  }
+
+  .double-grid {
     grid-template-columns: 1fr;
   }
 }

@@ -130,6 +130,18 @@ class RewardAndReportIntegrationTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data[0].workerId").value(21))
                 .andExpect(jsonPath("$.data[0].balance").value(120));
+
+        mockMvc.perform(get("/api/reports/materials")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].materialItemId").value(1))
+                .andExpect(jsonPath("$.data[0].totalPoints").value(35));
+
+        mockMvc.perform(get("/api/reports/rewards")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].rewardItemId").value(31))
+                .andExpect(jsonPath("$.data[0].totalQuantity").value(1));
     }
 
     private String loginAndGetToken(String username, String password) throws Exception {

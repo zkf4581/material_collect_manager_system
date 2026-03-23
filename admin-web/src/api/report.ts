@@ -15,10 +15,33 @@ export interface RankingItem {
   balance: number
 }
 
+export interface MaterialRankingItem {
+  materialItemId: number
+  materialName: string
+  unitCode: string
+  totalQuantity: number
+  totalPoints: number
+}
+
+export interface RewardRankingItem {
+  rewardItemId: number
+  rewardName: string
+  totalQuantity: number
+  totalPoints: number
+}
+
 export function getOverviewReport() {
   return httpGet<OverviewReport>('/reports/overview')
 }
 
 export function getRankingReport() {
   return httpGet<RankingItem[]>('/reports/rankings')
+}
+
+export function getMaterialRankingReport() {
+  return httpGet<MaterialRankingItem[]>('/reports/materials')
+}
+
+export function getRewardRankingReport() {
+  return httpGet<RewardRankingItem[]>('/reports/rewards')
 }
