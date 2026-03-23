@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getCurrentUser } from '@/api/auth'
 import MobileShell from '@/components/layout/MobileShell.vue'
@@ -8,6 +8,8 @@ import { clearToken } from '@/utils/storage'
 
 const appStore = useAppStore()
 const router = useRouter()
+const isWorker = computed(() => appStore.roleCode === 'WORKER')
+const isKeeper = computed(() => appStore.roleCode === 'KEEPER')
 
 onMounted(async () => {
   if (!appStore.username) {
@@ -57,10 +59,12 @@ function goRedeem() {
     </section>
 
     <section class="actions">
-      <button class="btn-primary" type="button" @click="goRecycle">回收登记</button>
-      <button class="btn-secondary" type="button" @click="goRecords">回收记录</button>
-      <button class="btn-secondary" type="button" @click="goPoints">我的积分</button>
-      <button class="btn-secondary" type="button" @click="goRedeem">积分兑换</button>
+      <button v-if="isKeeper" class="btn-primary" type="button" @click="goRecycle">回收登记</button>
+      <button class="btn-secondary" type="button" @click="goRecords">
+        {{ isWorker ? '我的回收记录' : '回收记录' }}
+      </button>
+      <button v-if="isWorker" class="btn-secondary" type="button" @click="goPoints">我的积分</button>
+      <button v-if="isWorker" class="btn-secondary" type="button" @click="goRedeem">积分兑换</button>
       <button class="btn-ghost" type="button" @click="goLogin">退出登录</button>
     </section>
   </MobileShell>

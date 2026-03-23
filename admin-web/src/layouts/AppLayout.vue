@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getAdminProfile, logout } from '@/api/auth'
 import { useAppStore } from '@/stores/app'
 
 const router = useRouter()
 const appStore = useAppStore()
+const isAdmin = computed(() => appStore.roleCode === 'ADMIN')
+const canReview = computed(() => ['ADMIN', 'KEEPER'].includes(appStore.roleCode))
 
 onMounted(async () => {
   if (!appStore.username) {
@@ -36,15 +38,15 @@ async function onLogout() {
       </div>
       <nav class="nav">
         <RouterLink to="/">工作台</RouterLink>
-        <RouterLink to="/projects">项目管理</RouterLink>
-        <RouterLink to="/teams">班组管理</RouterLink>
-        <RouterLink to="/workers">工人管理</RouterLink>
-        <RouterLink to="/materials">材料管理</RouterLink>
-        <RouterLink to="/point-rules">积分规则</RouterLink>
-        <RouterLink to="/recycle-records">回收审核</RouterLink>
-        <RouterLink to="/exchange-orders">兑换审核</RouterLink>
-        <RouterLink to="/goods">商品管理</RouterLink>
-        <RouterLink to="/reports">基础报表</RouterLink>
+        <RouterLink v-if="isAdmin" to="/projects">项目管理</RouterLink>
+        <RouterLink v-if="isAdmin" to="/teams">班组管理</RouterLink>
+        <RouterLink v-if="isAdmin" to="/workers">工人管理</RouterLink>
+        <RouterLink v-if="isAdmin" to="/materials">材料管理</RouterLink>
+        <RouterLink v-if="isAdmin" to="/point-rules">积分规则</RouterLink>
+        <RouterLink v-if="canReview" to="/recycle-records">回收审核</RouterLink>
+        <RouterLink v-if="canReview" to="/exchange-orders">兑换审核</RouterLink>
+        <RouterLink v-if="isAdmin" to="/goods">商品管理</RouterLink>
+        <RouterLink v-if="canReview" to="/reports">基础报表</RouterLink>
       </nav>
     </aside>
 

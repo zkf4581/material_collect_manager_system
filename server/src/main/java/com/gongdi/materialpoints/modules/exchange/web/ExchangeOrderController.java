@@ -1,8 +1,7 @@
 package com.gongdi.materialpoints.modules.exchange.web;
 
 import com.gongdi.materialpoints.common.api.ApiResponse;
-import com.gongdi.materialpoints.common.exception.BusinessException;
-import com.gongdi.materialpoints.modules.auth.service.CurrentUser;
+import com.gongdi.materialpoints.modules.auth.service.RoleGuard;
 import com.gongdi.materialpoints.modules.exchange.domain.ExchangeOrder;
 import com.gongdi.materialpoints.modules.exchange.service.ExchangeOrderService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,9 +22,11 @@ import java.util.List;
 public class ExchangeOrderController {
 
     private final ExchangeOrderService exchangeOrderService;
+    private final RoleGuard roleGuard;
 
-    public ExchangeOrderController(ExchangeOrderService exchangeOrderService) {
+    public ExchangeOrderController(ExchangeOrderService exchangeOrderService, RoleGuard roleGuard) {
         this.exchangeOrderService = exchangeOrderService;
+        this.roleGuard = roleGuard;
     }
 
     @PostMapping
@@ -34,37 +35,32 @@ public class ExchangeOrderController {
             @Valid @RequestBody CreateExchangeOrderRequest body
     ) {
         return ApiResponse.success(exchangeOrderService.create(
-                requiredCurrentUser(request),
+                roleGuard.requireWorker(request),
                 new ExchangeOrderService.CreateExchangeOrderCommand(body.rewardItemId(), body.quantity())
         ));
     }
 
     @GetMapping("/me")
     public ApiResponse<List<ExchangeOrder>> myOrders(HttpServletRequest request) {
-        return ApiResponse.success(exchangeOrderService.listForCurrentUser(requiredCurrentUser(request)));
+        return ApiResponse.success(exchangeOrderService.listForCurrentUser(roleGuard.requireWorker(request)));
     }
 
     @GetMapping
-    public ApiResponse<List<ExchangeOrder>> list() {
+    public ApiResponse<List<ExchangeOrder>> list(HttpServletRequest request) {
+        roleGuard.requireAnyRole(request, "ADMIN", "KEEPER");
         return ApiResponse.success(exchangeOrderService.listAll());
     }
 
     @PostMapping("/{id}/approve")
-    public ApiResponse<ExchangeOrder> approve(@PathVariable Long id) {
+    public ApiResponse<ExchangeOrder> approve(HttpServletRequest request, @PathVariable Long id) {
+        roleGuard.requireAnyRole(request, "ADMIN", "KEEPER");
         return ApiResponse.success(exchangeOrderService.approve(id));
     }
 
     @PostMapping("/{id}/reject")
-    public ApiResponse<ExchangeOrder> reject(@PathVariable Long id) {
+    public ApiResponse<ExchangeOrder> reject(HttpServletRequest request, @PathVariable Long id) {
+        roleGuard.requireAnyRole(request, "ADMIN", "KEEPER");
         return ApiResponse.success(exchangeOrderService.reject(id));
-    }
-
-    private CurrentUser requiredCurrentUser(HttpServletRequest request) {
-        CurrentUser currentUser = (CurrentUser) request.getAttribute("currentUser");
-        if (currentUser == null) {
-            throw new BusinessException(40101, "未登录或登录已失效");
-        }
-        return currentUser;
     }
 
     public record CreateExchangeOrderRequest(

@@ -1,6 +1,7 @@
 package com.gongdi.materialpoints.modules.report.web;
 
 import com.gongdi.materialpoints.common.api.ApiResponse;
+import com.gongdi.materialpoints.modules.auth.service.RoleGuard;
 import com.gongdi.materialpoints.modules.exchange.domain.ExchangeOrder;
 import com.gongdi.materialpoints.modules.exchange.repository.ExchangeOrderRepository;
 import com.gongdi.materialpoints.modules.point.domain.PointAccount;
@@ -8,6 +9,7 @@ import com.gongdi.materialpoints.modules.point.repository.PointAccountRepository
 import com.gongdi.materialpoints.modules.recycle.domain.RecycleRecord;
 import com.gongdi.materialpoints.modules.recycle.repository.RecycleRecordRepository;
 import com.gongdi.materialpoints.modules.reward.repository.RewardItemRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,21 +25,25 @@ public class ReportController {
     private final PointAccountRepository pointAccountRepository;
     private final ExchangeOrderRepository exchangeOrderRepository;
     private final RewardItemRepository rewardItemRepository;
+    private final RoleGuard roleGuard;
 
     public ReportController(
             RecycleRecordRepository recycleRecordRepository,
             PointAccountRepository pointAccountRepository,
             ExchangeOrderRepository exchangeOrderRepository,
-            RewardItemRepository rewardItemRepository
+            RewardItemRepository rewardItemRepository,
+            RoleGuard roleGuard
     ) {
         this.recycleRecordRepository = recycleRecordRepository;
         this.pointAccountRepository = pointAccountRepository;
         this.exchangeOrderRepository = exchangeOrderRepository;
         this.rewardItemRepository = rewardItemRepository;
+        this.roleGuard = roleGuard;
     }
 
     @GetMapping("/overview")
-    public ApiResponse<OverviewReportResponse> overview() {
+    public ApiResponse<OverviewReportResponse> overview(HttpServletRequest request) {
+        roleGuard.requireAnyRole(request, "ADMIN", "KEEPER");
         List<RecycleRecord> recycleRecords = recycleRecordRepository.findAll();
         List<ExchangeOrder> exchangeOrders = exchangeOrderRepository.findAll();
 
@@ -64,7 +70,8 @@ public class ReportController {
     }
 
     @GetMapping("/rankings")
-    public ApiResponse<List<WorkerRankingItem>> rankings() {
+    public ApiResponse<List<WorkerRankingItem>> rankings(HttpServletRequest request) {
+        roleGuard.requireAnyRole(request, "ADMIN", "KEEPER");
         List<WorkerRankingItem> rankings = pointAccountRepository.findAll().stream()
                 .sorted(Comparator.comparing(PointAccount::getBalance).reversed())
                 .map(item -> new WorkerRankingItem(item.getWorkerId(), item.getProjectId(), item.getBalance()))

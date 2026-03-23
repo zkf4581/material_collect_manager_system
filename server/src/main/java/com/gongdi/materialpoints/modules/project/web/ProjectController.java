@@ -1,10 +1,12 @@
 package com.gongdi.materialpoints.modules.project.web;
 
 import com.gongdi.materialpoints.common.api.ApiResponse;
+import com.gongdi.materialpoints.modules.auth.service.RoleGuard;
 import com.gongdi.materialpoints.modules.project.domain.Project;
 import com.gongdi.materialpoints.modules.project.domain.Team;
 import com.gongdi.materialpoints.modules.project.service.ProjectManageService;
 import com.gongdi.materialpoints.modules.worker.domain.Worker;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -24,9 +26,11 @@ import java.util.List;
 public class ProjectController {
 
     private final ProjectManageService projectManageService;
+    private final RoleGuard roleGuard;
 
-    public ProjectController(ProjectManageService projectManageService) {
+    public ProjectController(ProjectManageService projectManageService, RoleGuard roleGuard) {
         this.projectManageService = projectManageService;
+        this.roleGuard = roleGuard;
     }
 
     @GetMapping("/projects")
@@ -35,14 +39,23 @@ public class ProjectController {
     }
 
     @PostMapping("/projects")
-    public ApiResponse<Project> createProject(@Valid @RequestBody SaveProjectRequest request) {
+    public ApiResponse<Project> createProject(
+            HttpServletRequest httpServletRequest,
+            @Valid @RequestBody SaveProjectRequest request
+    ) {
+        roleGuard.requireAnyRole(httpServletRequest, "ADMIN");
         return ApiResponse.success(projectManageService.createProject(
                 new ProjectManageService.SaveProjectCommand(request.name(), request.location(), request.status())
         ));
     }
 
     @PutMapping("/projects/{id}")
-    public ApiResponse<Project> updateProject(@PathVariable Long id, @Valid @RequestBody SaveProjectRequest request) {
+    public ApiResponse<Project> updateProject(
+            HttpServletRequest httpServletRequest,
+            @PathVariable Long id,
+            @Valid @RequestBody SaveProjectRequest request
+    ) {
+        roleGuard.requireAnyRole(httpServletRequest, "ADMIN");
         return ApiResponse.success(projectManageService.updateProject(
                 id,
                 new ProjectManageService.SaveProjectCommand(request.name(), request.location(), request.status())
@@ -55,14 +68,23 @@ public class ProjectController {
     }
 
     @PostMapping("/teams")
-    public ApiResponse<Team> createTeam(@Valid @RequestBody SaveTeamRequest request) {
+    public ApiResponse<Team> createTeam(
+            HttpServletRequest httpServletRequest,
+            @Valid @RequestBody SaveTeamRequest request
+    ) {
+        roleGuard.requireAnyRole(httpServletRequest, "ADMIN");
         return ApiResponse.success(projectManageService.createTeam(
                 new ProjectManageService.SaveTeamCommand(request.projectId(), request.name(), request.status())
         ));
     }
 
     @PutMapping("/teams/{id}")
-    public ApiResponse<Team> updateTeam(@PathVariable Long id, @Valid @RequestBody SaveTeamRequest request) {
+    public ApiResponse<Team> updateTeam(
+            HttpServletRequest httpServletRequest,
+            @PathVariable Long id,
+            @Valid @RequestBody SaveTeamRequest request
+    ) {
+        roleGuard.requireAnyRole(httpServletRequest, "ADMIN");
         return ApiResponse.success(projectManageService.updateTeam(
                 id,
                 new ProjectManageService.SaveTeamCommand(request.projectId(), request.name(), request.status())
@@ -75,14 +97,23 @@ public class ProjectController {
     }
 
     @PostMapping("/workers")
-    public ApiResponse<Worker> createWorker(@Valid @RequestBody SaveWorkerRequest request) {
+    public ApiResponse<Worker> createWorker(
+            HttpServletRequest httpServletRequest,
+            @Valid @RequestBody SaveWorkerRequest request
+    ) {
+        roleGuard.requireAnyRole(httpServletRequest, "ADMIN");
         return ApiResponse.success(projectManageService.createWorker(
                 new ProjectManageService.SaveWorkerCommand(request.name(), request.phone(), request.status())
         ));
     }
 
     @PutMapping("/workers/{id}")
-    public ApiResponse<Worker> updateWorker(@PathVariable Long id, @Valid @RequestBody SaveWorkerRequest request) {
+    public ApiResponse<Worker> updateWorker(
+            HttpServletRequest httpServletRequest,
+            @PathVariable Long id,
+            @Valid @RequestBody SaveWorkerRequest request
+    ) {
+        roleGuard.requireAnyRole(httpServletRequest, "ADMIN");
         return ApiResponse.success(projectManageService.updateWorker(
                 id,
                 new ProjectManageService.SaveWorkerCommand(request.name(), request.phone(), request.status())

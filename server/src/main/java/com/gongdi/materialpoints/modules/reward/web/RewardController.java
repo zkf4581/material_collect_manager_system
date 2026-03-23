@@ -1,8 +1,10 @@
 package com.gongdi.materialpoints.modules.reward.web;
 
 import com.gongdi.materialpoints.common.api.ApiResponse;
+import com.gongdi.materialpoints.modules.auth.service.RoleGuard;
 import com.gongdi.materialpoints.modules.reward.domain.RewardItem;
 import com.gongdi.materialpoints.modules.reward.service.RewardItemService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -22,9 +24,11 @@ import java.util.List;
 public class RewardController {
 
     private final RewardItemService rewardItemService;
+    private final RoleGuard roleGuard;
 
-    public RewardController(RewardItemService rewardItemService) {
+    public RewardController(RewardItemService rewardItemService, RoleGuard roleGuard) {
         this.rewardItemService = rewardItemService;
+        this.roleGuard = roleGuard;
     }
 
     @GetMapping
@@ -33,7 +37,11 @@ public class RewardController {
     }
 
     @PostMapping
-    public ApiResponse<RewardItem> create(@Valid @RequestBody SaveRewardItemRequest request) {
+    public ApiResponse<RewardItem> create(
+            HttpServletRequest httpServletRequest,
+            @Valid @RequestBody SaveRewardItemRequest request
+    ) {
+        roleGuard.requireAnyRole(httpServletRequest, "ADMIN");
         return ApiResponse.success(rewardItemService.create(new RewardItemService.CreateRewardItemCommand(
                 request.name(),
                 request.pointsCost(),
@@ -43,7 +51,12 @@ public class RewardController {
     }
 
     @PutMapping("/{id}")
-    public ApiResponse<RewardItem> update(@PathVariable Long id, @Valid @RequestBody SaveRewardItemRequest request) {
+    public ApiResponse<RewardItem> update(
+            HttpServletRequest httpServletRequest,
+            @PathVariable Long id,
+            @Valid @RequestBody SaveRewardItemRequest request
+    ) {
+        roleGuard.requireAnyRole(httpServletRequest, "ADMIN");
         return ApiResponse.success(rewardItemService.update(id, new RewardItemService.UpdateRewardItemCommand(
                 request.name(),
                 request.pointsCost(),

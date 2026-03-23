@@ -136,6 +136,10 @@ public class RecycleRecordService {
         return recycleRecordRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
     }
 
+    public List<RecycleRecord> listByWorker(Long workerId) {
+        return recycleRecordRepository.findAllByWorkerIdOrderByIdDesc(workerId);
+    }
+
     public record CreateRecycleRecordCommand(
             Long projectId,
             Long teamId,

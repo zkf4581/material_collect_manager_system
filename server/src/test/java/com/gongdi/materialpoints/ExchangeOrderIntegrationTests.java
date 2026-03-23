@@ -63,13 +63,15 @@ class ExchangeOrderIntegrationTests {
                 """);
         jdbcTemplate.update("""
                 INSERT INTO app_user (id, username, password, role_code, status, project_id, worker_id)
-                VALUES (2, 'admin', '{noop}123456', 'ADMIN', 'ENABLED', 1, null)
+                VALUES (2, 'admin', '{noop}123456', 'ADMIN', 'ENABLED', 1, null),
+                       (3, 'keeper', '{noop}123456', 'KEEPER', 'ENABLED', 1, null)
                 """);
     }
 
     @Test
     void createAndApproveExchangeOrderShouldDeductPointsAndStock() throws Exception {
         String workerToken = loginAndGetToken("worker01", "123456");
+        String adminToken = loginAndGetToken("admin", "123456");
 
         String createResponse = mockMvc.perform(post("/api/exchange-orders")
                         .header("Authorization", "Bearer " + workerToken)
@@ -90,7 +92,7 @@ class ExchangeOrderIntegrationTests {
         long orderId = objectMapper.readTree(createResponse).path("data").path("id").asLong();
 
         mockMvc.perform(post("/api/exchange-orders/{id}/approve", orderId)
-                        .header("Authorization", "Bearer " + workerToken))
+                        .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.status").value("APPROVED"));
 
@@ -127,6 +129,7 @@ class ExchangeOrderIntegrationTests {
     void createExchangeOrderWithInsufficientPointsShouldFailOnApprove() throws Exception {
         jdbcTemplate.update("UPDATE point_account SET balance = 20 WHERE id = 41");
         String workerToken = loginAndGetToken("worker01", "123456");
+        String keeperToken = loginAndGetToken("keeper", "123456");
 
         String createResponse = mockMvc.perform(post("/api/exchange-orders")
                         .header("Authorization", "Bearer " + workerToken)
@@ -145,7 +148,7 @@ class ExchangeOrderIntegrationTests {
         long orderId = objectMapper.readTree(createResponse).path("data").path("id").asLong();
 
         mockMvc.perform(post("/api/exchange-orders/{id}/approve", orderId)
-                        .header("Authorization", "Bearer " + workerToken))
+                        .header("Authorization", "Bearer " + keeperToken))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value(40902));
     }

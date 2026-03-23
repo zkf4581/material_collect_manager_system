@@ -1,9 +1,11 @@
 package com.gongdi.materialpoints.modules.material.web;
 
 import com.gongdi.materialpoints.common.api.ApiResponse;
+import com.gongdi.materialpoints.modules.auth.service.RoleGuard;
 import com.gongdi.materialpoints.modules.material.domain.MaterialItem;
 import com.gongdi.materialpoints.modules.material.domain.PointRule;
 import com.gongdi.materialpoints.modules.material.service.MaterialManageService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
@@ -25,9 +27,11 @@ import java.util.Map;
 public class MaterialController {
 
     private final MaterialManageService materialManageService;
+    private final RoleGuard roleGuard;
 
-    public MaterialController(MaterialManageService materialManageService) {
+    public MaterialController(MaterialManageService materialManageService, RoleGuard roleGuard) {
         this.materialManageService = materialManageService;
+        this.roleGuard = roleGuard;
     }
 
     @GetMapping("/material-items")
@@ -36,7 +40,11 @@ public class MaterialController {
     }
 
     @PostMapping("/material-items")
-    public ApiResponse<MaterialItem> createMaterialItem(@Valid @RequestBody SaveMaterialItemRequest request) {
+    public ApiResponse<MaterialItem> createMaterialItem(
+            HttpServletRequest httpServletRequest,
+            @Valid @RequestBody SaveMaterialItemRequest request
+    ) {
+        roleGuard.requireAnyRole(httpServletRequest, "ADMIN");
         return ApiResponse.success(materialManageService.createMaterialItem(new MaterialManageService.SaveMaterialItemCommand(
                 request.name(),
                 request.unitCode(),
@@ -46,9 +54,11 @@ public class MaterialController {
 
     @PutMapping("/material-items/{id}")
     public ApiResponse<MaterialItem> updateMaterialItem(
+            HttpServletRequest httpServletRequest,
             @PathVariable Long id,
             @Valid @RequestBody SaveMaterialItemRequest request
     ) {
+        roleGuard.requireAnyRole(httpServletRequest, "ADMIN");
         return ApiResponse.success(materialManageService.updateMaterialItem(id, new MaterialManageService.SaveMaterialItemCommand(
                 request.name(),
                 request.unitCode(),
@@ -62,7 +72,11 @@ public class MaterialController {
     }
 
     @PostMapping("/point-rules")
-    public ApiResponse<PointRule> createPointRule(@Valid @RequestBody SavePointRuleRequest request) {
+    public ApiResponse<PointRule> createPointRule(
+            HttpServletRequest httpServletRequest,
+            @Valid @RequestBody SavePointRuleRequest request
+    ) {
+        roleGuard.requireAnyRole(httpServletRequest, "ADMIN");
         return ApiResponse.success(materialManageService.createPointRule(new MaterialManageService.SavePointRuleCommand(
                 request.materialItemId(),
                 request.unitCode(),
@@ -75,9 +89,11 @@ public class MaterialController {
 
     @PutMapping("/point-rules/{id}")
     public ApiResponse<PointRule> updatePointRule(
+            HttpServletRequest httpServletRequest,
             @PathVariable Long id,
             @Valid @RequestBody SavePointRuleRequest request
     ) {
+        roleGuard.requireAnyRole(httpServletRequest, "ADMIN");
         return ApiResponse.success(materialManageService.updatePointRule(id, new MaterialManageService.SavePointRuleCommand(
                 request.materialItemId(),
                 request.unitCode(),

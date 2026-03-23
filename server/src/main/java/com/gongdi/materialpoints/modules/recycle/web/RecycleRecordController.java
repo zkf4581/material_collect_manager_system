@@ -1,8 +1,11 @@
 package com.gongdi.materialpoints.modules.recycle.web;
 
 import com.gongdi.materialpoints.common.api.ApiResponse;
+import com.gongdi.materialpoints.modules.auth.service.CurrentUser;
+import com.gongdi.materialpoints.modules.auth.service.RoleGuard;
 import com.gongdi.materialpoints.modules.recycle.domain.RecycleRecord;
 import com.gongdi.materialpoints.modules.recycle.service.RecycleRecordService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
@@ -23,13 +26,19 @@ import java.util.List;
 public class RecycleRecordController {
 
     private final RecycleRecordService recycleRecordService;
+    private final RoleGuard roleGuard;
 
-    public RecycleRecordController(RecycleRecordService recycleRecordService) {
+    public RecycleRecordController(RecycleRecordService recycleRecordService, RoleGuard roleGuard) {
         this.recycleRecordService = recycleRecordService;
+        this.roleGuard = roleGuard;
     }
 
     @PostMapping
-    public ApiResponse<RecycleRecord> create(@Valid @RequestBody CreateRecycleRecordRequest request) {
+    public ApiResponse<RecycleRecord> create(
+            HttpServletRequest httpServletRequest,
+            @Valid @RequestBody CreateRecycleRecordRequest request
+    ) {
+        roleGuard.requireAnyRole(httpServletRequest, "ADMIN", "KEEPER");
         RecycleRecord recycleRecord = recycleRecordService.create(new RecycleRecordService.CreateRecycleRecordCommand(
                 request.projectId(),
                 request.teamId(),
@@ -45,12 +54,17 @@ public class RecycleRecordController {
     }
 
     @PostMapping("/{id}/approve")
-    public ApiResponse<RecycleRecord> approve(@PathVariable Long id) {
+    public ApiResponse<RecycleRecord> approve(HttpServletRequest httpServletRequest, @PathVariable Long id) {
+        roleGuard.requireAnyRole(httpServletRequest, "ADMIN", "KEEPER");
         return ApiResponse.success(recycleRecordService.approve(id));
     }
 
     @GetMapping
-    public ApiResponse<List<RecycleRecord>> list() {
+    public ApiResponse<List<RecycleRecord>> list(HttpServletRequest httpServletRequest) {
+        CurrentUser currentUser = roleGuard.requireCurrentUser(httpServletRequest);
+        if ("WORKER".equals(currentUser.roleCode())) {
+            return ApiResponse.success(recycleRecordService.listByWorker(currentUser.workerId()));
+        }
         return ApiResponse.success(recycleRecordService.listAll());
     }
 

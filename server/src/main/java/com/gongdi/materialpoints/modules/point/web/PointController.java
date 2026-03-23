@@ -1,8 +1,7 @@
 package com.gongdi.materialpoints.modules.point.web;
 
 import com.gongdi.materialpoints.common.api.ApiResponse;
-import com.gongdi.materialpoints.common.exception.BusinessException;
-import com.gongdi.materialpoints.modules.auth.service.CurrentUser;
+import com.gongdi.materialpoints.modules.auth.service.RoleGuard;
 import com.gongdi.materialpoints.modules.point.domain.PointAccount;
 import com.gongdi.materialpoints.modules.point.domain.PointLedger;
 import com.gongdi.materialpoints.modules.point.repository.PointAccountRepository;
@@ -20,15 +19,21 @@ public class PointController {
 
     private final PointAccountRepository pointAccountRepository;
     private final PointLedgerRepository pointLedgerRepository;
+    private final RoleGuard roleGuard;
 
-    public PointController(PointAccountRepository pointAccountRepository, PointLedgerRepository pointLedgerRepository) {
+    public PointController(
+            PointAccountRepository pointAccountRepository,
+            PointLedgerRepository pointLedgerRepository,
+            RoleGuard roleGuard
+    ) {
         this.pointAccountRepository = pointAccountRepository;
         this.pointLedgerRepository = pointLedgerRepository;
+        this.roleGuard = roleGuard;
     }
 
     @GetMapping("/summary")
     public ApiResponse<PointSummaryResponse> summary(HttpServletRequest request) {
-        CurrentUser currentUser = requiredCurrentUser(request);
+        var currentUser = roleGuard.requireWorker(request);
         PointAccount account = pointAccountRepository
                 .findByProjectIdAndWorkerId(currentUser.projectId(), currentUser.workerId())
                 .orElseGet(() -> {
@@ -48,16 +53,8 @@ public class PointController {
 
     @GetMapping("/ledger")
     public ApiResponse<List<PointLedger>> ledger(HttpServletRequest request) {
-        CurrentUser currentUser = requiredCurrentUser(request);
+        var currentUser = roleGuard.requireWorker(request);
         return ApiResponse.success(pointLedgerRepository.findAllByWorkerIdOrderByIdDesc(currentUser.workerId()));
-    }
-
-    private CurrentUser requiredCurrentUser(HttpServletRequest request) {
-        CurrentUser currentUser = (CurrentUser) request.getAttribute("currentUser");
-        if (currentUser == null || currentUser.workerId() == null) {
-            throw new BusinessException(40101, "当前账号未绑定工人或未登录");
-        }
-        return currentUser;
     }
 
     public record PointSummaryResponse(Integer balance, Long projectId, Long workerId) {
