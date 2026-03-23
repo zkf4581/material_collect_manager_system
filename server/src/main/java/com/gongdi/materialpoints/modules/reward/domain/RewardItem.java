@@ -35,8 +35,16 @@ public class RewardItem {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public Integer getPointsCost() {
         return pointsCost;
+    }
+
+    public void setPointsCost(Integer pointsCost) {
+        this.pointsCost = pointsCost;
     }
 
     public Integer getStock() {
@@ -49,5 +57,9 @@ public class RewardItem {
 
     public String getStatus() {
         return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

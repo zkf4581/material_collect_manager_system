@@ -41,6 +41,8 @@ async function onLogout() {
         <a href="javascript:void(0)">积分规则</a>
         <RouterLink to="/recycle-records">回收审核</RouterLink>
         <RouterLink to="/exchange-orders">兑换审核</RouterLink>
+        <RouterLink to="/goods">商品管理</RouterLink>
+        <RouterLink to="/reports">基础报表</RouterLink>
       </nav>
     </aside>
 

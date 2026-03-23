@@ -33,6 +33,18 @@ const router = createRouter({
           component: () => import('@/views/exchange/ExchangeOrdersView.vue'),
           meta: { title: '兑换审核' },
         },
+        {
+          path: 'goods',
+          name: 'goods',
+          component: () => import('@/views/goods/GoodsManageView.vue'),
+          meta: { title: '商品管理' },
+        },
+        {
+          path: 'reports',
+          name: 'reports',
+          component: () => import('@/views/report/ReportView.vue'),
+          meta: { title: '基础报表' },
+        },
       ],
     },
   ],
