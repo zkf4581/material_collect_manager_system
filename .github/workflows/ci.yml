@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Test Server
+        working-directory: server
+        run: ./mvnw test
+
+      - name: Install H5 Dependencies
+        working-directory: client-h5
+        run: pnpm install --frozen-lockfile
+
+      - name: Build H5
+        working-directory: client-h5
+        run: pnpm build
+
+      - name: Install Admin Dependencies
+        working-directory: admin-web
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Admin
+        working-directory: admin-web
+        run: pnpm build

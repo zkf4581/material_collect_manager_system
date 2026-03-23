@@ -1,0 +1,63 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: material-points-mysql-prod
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-material_points}
+      TZ: Asia/Shanghai
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-time-zone=+08:00
+    volumes:
+      - mysql_prod_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+
+  server:
+    build:
+      context: ../../server
+      dockerfile: Dockerfile
+    container_name: material-points-server-prod
+    restart: unless-stopped
+    depends_on:
+      - mysql
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-material_points}?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      APP_FILE_STORAGE_TYPE: local
+      APP_FILE_BASE_DIR: /app/uploads
+    volumes:
+      - server_uploads:/app/uploads
+    ports:
+      - "8080:8080"
+
+  client-h5:
+    build:
+      context: ../../client-h5
+      dockerfile: Dockerfile
+    container_name: material-points-h5-prod
+    restart: unless-stopped
+    depends_on:
+      - server
+    ports:
+      - "8081:80"
+
+  admin-web:
+    build:
+      context: ../../admin-web
+      dockerfile: Dockerfile
+    container_name: material-points-admin-prod
+    restart: unless-stopped
+    depends_on:
+      - server
+    ports:
+      - "8082:80"
+
+volumes:
+  mysql_prod_data:
+  server_uploads:

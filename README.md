@@ -32,6 +32,7 @@
 - [07-接口与状态机约定.md](/Users/zhangxiaolong/工地材料换积分/07-接口与状态机约定.md)
 - [08-项目开发进度表.md](/Users/zhangxiaolong/工地材料换积分/08-项目开发进度表.md)
 - [09-任务标签与交接规范.md](/Users/zhangxiaolong/工地材料换积分/09-任务标签与交接规范.md)
+- [ops/部署准备说明.md](/Users/zhangxiaolong/工地材料换积分/ops/部署准备说明.md)
 
 ## 4. 推荐目录规划
 
