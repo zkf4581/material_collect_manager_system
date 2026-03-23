@@ -32,11 +32,23 @@ public class MaterialItem {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public String getUnitCode() {
         return unitCode;
     }
 
+    public void setUnitCode(String unitCode) {
+        this.unitCode = unitCode;
+    }
+
     public String getStatus() {
         return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

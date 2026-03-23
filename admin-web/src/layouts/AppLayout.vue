@@ -38,7 +38,8 @@ async function onLogout() {
         <RouterLink to="/">工作台</RouterLink>
         <a href="javascript:void(0)">项目管理</a>
         <a href="javascript:void(0)">人员管理</a>
-        <a href="javascript:void(0)">积分规则</a>
+        <RouterLink to="/materials">材料管理</RouterLink>
+        <RouterLink to="/point-rules">积分规则</RouterLink>
         <RouterLink to="/recycle-records">回收审核</RouterLink>
         <RouterLink to="/exchange-orders">兑换审核</RouterLink>
         <RouterLink to="/goods">商品管理</RouterLink>

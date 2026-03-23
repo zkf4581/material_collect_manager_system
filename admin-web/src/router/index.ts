@@ -40,6 +40,18 @@ const router = createRouter({
           meta: { title: '商品管理' },
         },
         {
+          path: 'materials',
+          name: 'materials',
+          component: () => import('@/views/material/MaterialManageView.vue'),
+          meta: { title: '材料管理' },
+        },
+        {
+          path: 'point-rules',
+          name: 'point-rules',
+          component: () => import('@/views/rule/PointRuleManageView.vue'),
+          meta: { title: '积分规则' },
+        },
+        {
           path: 'reports',
           name: 'reports',
           component: () => import('@/views/report/ReportView.vue'),

@@ -43,23 +43,47 @@ public class PointRule {
         return materialItemId;
     }
 
+    public void setMaterialItemId(Long materialItemId) {
+        this.materialItemId = materialItemId;
+    }
+
     public String getUnitCode() {
         return unitCode;
+    }
+
+    public void setUnitCode(String unitCode) {
+        this.unitCode = unitCode;
     }
 
     public BigDecimal getBasePoint() {
         return basePoint;
     }
 
+    public void setBasePoint(BigDecimal basePoint) {
+        this.basePoint = basePoint;
+    }
+
     public String getConditionCode() {
         return conditionCode;
+    }
+
+    public void setConditionCode(String conditionCode) {
+        this.conditionCode = conditionCode;
     }
 
     public BigDecimal getConditionFactor() {
         return conditionFactor;
     }
 
+    public void setConditionFactor(BigDecimal conditionFactor) {
+        this.conditionFactor = conditionFactor;
+    }
+
     public String getStatus() {
         return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }
