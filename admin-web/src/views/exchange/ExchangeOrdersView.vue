@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import {
   approveExchangeOrder,
+  deliverExchangeOrder,
   getExchangeOrders,
   getRewardItems,
   rejectExchangeOrder,
@@ -56,6 +57,19 @@ async function onReject(id: number) {
   }
 }
 
+async function onDeliver(id: number) {
+  processingId.value = id
+  try {
+    await deliverExchangeOrder(id)
+    ElMessage.success('发放确认成功')
+    await loadData()
+  } catch (error) {
+    ElMessage.error(error instanceof Error ? error.message : '发放确认失败')
+  } finally {
+    processingId.value = null
+  }
+}
+
 onMounted(loadData)
 </script>
 
@@ -96,6 +110,11 @@ onMounted(loadData)
             </el-button>
             <el-button size="small" plain :loading="processingId === row.id" @click="onReject(row.id)">
               驳回
+            </el-button>
+          </div>
+          <div v-else-if="row.status === 'APPROVED'" class="actions">
+            <el-button size="small" type="success" :loading="processingId === row.id" @click="onDeliver(row.id)">
+              确认发放
             </el-button>
           </div>
           <span v-else class="done-text">已处理</span>

@@ -38,3 +38,9 @@ export function rejectExchangeOrder(id: number) {
     method: 'POST',
   })
 }
+
+export function deliverExchangeOrder(id: number) {
+  return httpRequest<ExchangeOrder>(`/exchange-orders/${id}/deliver`, {
+    method: 'POST',
+  })
+}

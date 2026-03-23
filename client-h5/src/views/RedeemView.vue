@@ -68,6 +68,8 @@ onMounted(loadData)
           <p>商品 ID：{{ item.rewardItemId }}</p>
           <p>数量：{{ item.quantity }}</p>
           <p>积分：{{ item.totalPoints }}</p>
+          <p v-if="item.approvedAt">审核时间：{{ item.approvedAt }}</p>
+          <p v-if="item.deliveredAt">发放时间：{{ item.deliveredAt }}</p>
         </article>
         <div v-if="orders.length === 0" class="empty">暂无兑换申请</div>
       </section>

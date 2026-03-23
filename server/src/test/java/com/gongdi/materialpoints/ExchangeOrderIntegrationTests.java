@@ -96,6 +96,11 @@ class ExchangeOrderIntegrationTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.status").value("APPROVED"));
 
+        mockMvc.perform(post("/api/exchange-orders/{id}/deliver", orderId)
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status").value("DELIVERED"));
+
         Integer balance = jdbcTemplate.queryForObject(
                 "SELECT balance FROM point_account WHERE id = 41",
                 Integer.class
@@ -123,6 +128,13 @@ class ExchangeOrderIntegrationTests {
                         .header("Authorization", "Bearer " + workerToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data[0].bizType").value("EXCHANGE_DEDUCT"));
+
+        String status = jdbcTemplate.queryForObject(
+                "SELECT status FROM exchange_order WHERE id = ?",
+                String.class,
+                orderId
+        );
+        assertThat(status).isEqualTo("DELIVERED");
     }
 
     @Test

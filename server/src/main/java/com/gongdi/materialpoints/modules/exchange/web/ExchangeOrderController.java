@@ -63,6 +63,12 @@ public class ExchangeOrderController {
         return ApiResponse.success(exchangeOrderService.reject(id));
     }
 
+    @PostMapping("/{id}/deliver")
+    public ApiResponse<ExchangeOrder> deliver(HttpServletRequest request, @PathVariable Long id) {
+        roleGuard.requireAnyRole(request, "ADMIN", "KEEPER");
+        return ApiResponse.success(exchangeOrderService.deliver(id));
+    }
+
     public record CreateExchangeOrderRequest(
             @NotNull(message = "商品不能为空")
             Long rewardItemId,

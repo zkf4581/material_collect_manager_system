@@ -17,6 +17,8 @@ export interface ExchangeOrder {
   quantity: number
   totalPoints: number
   status: string
+  approvedAt?: string
+  deliveredAt?: string
 }
 
 export function getRewardItems() {

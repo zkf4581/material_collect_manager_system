@@ -115,6 +115,18 @@ public class ExchangeOrderService {
         return exchangeOrderRepository.save(exchangeOrder);
     }
 
+    @Transactional
+    public ExchangeOrder deliver(Long exchangeOrderId) {
+        ExchangeOrder exchangeOrder = exchangeOrderRepository.findById(exchangeOrderId)
+                .orElseThrow(() -> new BusinessException(40401, "兑换申请不存在"));
+        if (!"APPROVED".equals(exchangeOrder.getStatus())) {
+            throw new BusinessException(40901, "当前状态不允许发放确认");
+        }
+        exchangeOrder.setStatus("DELIVERED");
+        exchangeOrder.setDeliveredAt(LocalDateTime.now());
+        return exchangeOrderRepository.save(exchangeOrder);
+    }
+
     public List<ExchangeOrder> listForCurrentUser(CurrentUser currentUser) {
         if (currentUser.workerId() == null) {
             throw new BusinessException(40301, "当前账号未绑定工人");
