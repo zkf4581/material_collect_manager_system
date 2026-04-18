@@ -49,13 +49,25 @@ public class ExchangeOrderService {
                 .filter(item -> "ENABLED".equals(item.getStatus()))
                 .orElseThrow(() -> new BusinessException(40401, "兑换商品不存在"));
 
+        if (rewardItem.getStock() < command.quantity()) {
+            throw new BusinessException(40903, "商品库存不足");
+        }
+
+        PointAccount pointAccount = pointAccountRepository
+                .findByProjectIdAndWorkerId(currentUser.projectId(), currentUser.workerId())
+                .orElseThrow(() -> new BusinessException(40902, "积分不足"));
+        int totalPoints = rewardItem.getPointsCost() * command.quantity();
+        if (pointAccount.getBalance() < totalPoints) {
+            throw new BusinessException(40902, "积分不足");
+        }
+
         ExchangeOrder exchangeOrder = new ExchangeOrder();
         exchangeOrder.setOrderNo(generateOrderNo());
         exchangeOrder.setProjectId(currentUser.projectId());
         exchangeOrder.setWorkerId(currentUser.workerId());
         exchangeOrder.setRewardItemId(rewardItem.getId());
         exchangeOrder.setQuantity(command.quantity());
-        exchangeOrder.setTotalPoints(rewardItem.getPointsCost() * command.quantity());
+        exchangeOrder.setTotalPoints(totalPoints);
         exchangeOrder.setStatus("SUBMITTED");
         exchangeOrder.setSubmittedAt(LocalDateTime.now());
         return exchangeOrderRepository.save(exchangeOrder);
