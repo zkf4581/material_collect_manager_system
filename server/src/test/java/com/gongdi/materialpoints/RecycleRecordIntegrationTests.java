@@ -154,6 +154,43 @@ class RecycleRecordIntegrationTests {
                 .andExpect(jsonPath("$.code").value(40001));
     }
 
+    @Test
+    void createRecycleRecordShouldFallbackToBaseRuleWhenConditionRuleMissing() throws Exception {
+        String token = loginAndGetToken("keeper", "123456");
+
+        mockMvc.perform(post("/api/recycle-records")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType("application/json")
+                        .content("""
+                                {
+                                  "projectId": 1,
+                                  "teamId": 11,
+                                  "workerId": 21,
+                                  "materialItemId": 31,
+                                  "quantity": 10,
+                                  "unitCode": "KG",
+                                  "conditionCode": "MINOR",
+                                  "remark": "钢筋余料轻微损耗回收",
+                                  "photoIds": [51]
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status").value("SUBMITTED"))
+                .andExpect(jsonPath("$.data.calculatedPoints").value(8));
+
+        String conditionCode = jdbcTemplate.queryForObject(
+                "SELECT condition_code FROM point_rule WHERE id = 41",
+                String.class
+        );
+        String conditionFactor = jdbcTemplate.queryForObject(
+                "SELECT CAST(condition_factor AS VARCHAR) FROM point_rule WHERE id = 41",
+                String.class
+        );
+
+        assertThat(conditionCode).isEqualTo("OK");
+        assertThat(conditionFactor).startsWith("1");
+    }
+
     private String loginAndGetToken(String username, String password) throws Exception {
         String responseBody = mockMvc.perform(post("/api/auth/login")
                         .contentType("application/json")
