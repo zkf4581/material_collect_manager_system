@@ -16,4 +16,10 @@ public interface PointRuleRepository extends JpaRepository<PointRule, Long> {
             String conditionCode,
             String status
     );
+
+    Optional<PointRule> findFirstByMaterialItemIdAndUnitCodeAndStatus(
+            Long materialItemId,
+            String unitCode,
+            String status
+    );
 }

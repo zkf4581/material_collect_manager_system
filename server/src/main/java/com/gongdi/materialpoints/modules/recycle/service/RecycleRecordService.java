@@ -21,9 +21,17 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class RecycleRecordService {
+
+    private static final Map<String, BigDecimal> CONDITION_FACTORS = Map.of(
+            "OK", new BigDecimal("1.00"),
+            "MINOR", new BigDecimal("0.80"),
+            "RECYCLE", new BigDecimal("0.50")
+    );
 
     private final RecycleRecordRepository recycleRecordRepository;
     private final RecyclePhotoRepository recyclePhotoRepository;
@@ -50,14 +58,26 @@ public class RecycleRecordService {
 
     @Transactional
     public RecycleRecord create(CreateRecycleRecordCommand command) {
-        PointRule pointRule = pointRuleRepository
+        Optional<PointRule> exactPointRule = pointRuleRepository
                 .findFirstByMaterialItemIdAndUnitCodeAndConditionCodeAndStatus(
                         command.materialItemId(),
                         command.unitCode(),
                         command.conditionCode(),
                         "ENABLED"
-                )
-                .orElseThrow(() -> new BusinessException(40401, "未找到匹配的积分规则"));
+                );
+
+        PointRule pointRule = exactPointRule
+                .orElseGet(() -> pointRuleRepository
+                        .findFirstByMaterialItemIdAndUnitCodeAndStatus(
+                                command.materialItemId(),
+                                command.unitCode(),
+                                "ENABLED"
+                        )
+                        .orElseThrow(() -> new BusinessException(40401, "未找到匹配的积分规则")));
+
+        BigDecimal conditionFactor = exactPointRule
+                .map(PointRule::getConditionFactor)
+                .orElseGet(() -> resolveFallbackFactor(command.conditionCode()));
 
         List<FileRecord> fileRecords = fileRecordRepository.findAllById(command.photoIds());
         if (fileRecords.size() != command.photoIds().size()) {
@@ -65,7 +85,7 @@ public class RecycleRecordService {
         }
 
         BigDecimal points = pointRule.getBasePoint()
-                .multiply(pointRule.getConditionFactor())
+                .multiply(conditionFactor)
                 .multiply(command.quantity());
 
         RecycleRecord recycleRecord = new RecycleRecord();
@@ -151,5 +171,13 @@ public class RecycleRecordService {
             String remark,
             List<Long> photoIds
     ) {
+    }
+
+    private BigDecimal resolveFallbackFactor(String conditionCode) {
+        BigDecimal fallbackFactor = CONDITION_FACTORS.get(conditionCode);
+        if (fallbackFactor == null) {
+            throw new BusinessException(40401, "未找到匹配的积分规则");
+        }
+        return fallbackFactor;
     }
 }
