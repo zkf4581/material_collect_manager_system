@@ -59,6 +59,8 @@ export interface RecycleRecordItem {
   calculatedPoints: number
   status: string
   remark?: string
+  submittedAt?: string
+  approvedAt?: string
 }
 
 export interface CreateRecyclePayload {
