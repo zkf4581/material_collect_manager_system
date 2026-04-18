@@ -138,12 +138,11 @@ class ExchangeOrderIntegrationTests {
     }
 
     @Test
-    void createExchangeOrderWithInsufficientPointsShouldFailOnApprove() throws Exception {
+    void createExchangeOrderWithInsufficientPointsShouldFailImmediately() throws Exception {
         jdbcTemplate.update("UPDATE point_account SET balance = 20 WHERE id = 41");
         String workerToken = loginAndGetToken("worker01", "123456");
-        String keeperToken = loginAndGetToken("keeper", "123456");
 
-        String createResponse = mockMvc.perform(post("/api/exchange-orders")
+        mockMvc.perform(post("/api/exchange-orders")
                         .header("Authorization", "Bearer " + workerToken)
                         .contentType("application/json")
                         .content("""
@@ -152,17 +151,40 @@ class ExchangeOrderIntegrationTests {
                                   "quantity": 1
                                 }
                                 """))
-                .andExpect(status().isOk())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-
-        long orderId = objectMapper.readTree(createResponse).path("data").path("id").asLong();
-
-        mockMvc.perform(post("/api/exchange-orders/{id}/approve", orderId)
-                        .header("Authorization", "Bearer " + keeperToken))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value(40902));
+
+        Integer orderCount = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM exchange_order",
+                Integer.class
+        );
+
+        assertThat(orderCount).isEqualTo(0);
+    }
+
+    @Test
+    void createExchangeOrderWithInsufficientStockShouldFailImmediately() throws Exception {
+        jdbcTemplate.update("UPDATE reward_item SET stock = 0 WHERE id = 31");
+        String workerToken = loginAndGetToken("worker01", "123456");
+
+        mockMvc.perform(post("/api/exchange-orders")
+                        .header("Authorization", "Bearer " + workerToken)
+                        .contentType("application/json")
+                        .content("""
+                                {
+                                  "rewardItemId": 31,
+                                  "quantity": 1
+                                }
+                                """))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value(40903));
+
+        Integer orderCount = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM exchange_order",
+                Integer.class
+        );
+
+        assertThat(orderCount).isEqualTo(0);
     }
 
     private String loginAndGetToken(String username, String password) throws Exception {
