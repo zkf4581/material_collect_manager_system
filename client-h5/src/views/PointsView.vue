@@ -1,19 +1,49 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { showToast } from 'vant'
 import MobileShell from '@/components/layout/MobileShell.vue'
+import { getCurrentUser, type CurrentUser } from '@/api/auth'
 import { getPointLedger, getPointSummary, type PointLedgerItem, type PointSummary } from '@/api/points'
+import { getProjects, getTeams, getWorkers, type ProjectOption, type TeamOption, type WorkerOption } from '@/api/recycle'
 
 const loading = ref(false)
+const currentUser = ref<CurrentUser | null>(null)
 const summary = ref<PointSummary | null>(null)
 const ledger = ref<PointLedgerItem[]>([])
+const projects = ref<ProjectOption[]>([])
+const teams = ref<TeamOption[]>([])
+const workers = ref<WorkerOption[]>([])
+
+const currentWorker = computed(() =>
+  workers.value.find((item) => item.id === (summary.value?.workerId ?? currentUser.value?.workerId)) ?? null,
+)
+const currentTeam = computed(() =>
+  teams.value.find((item) => item.id === currentWorker.value?.teamId) ?? null,
+)
+const currentProject = computed(() =>
+  projects.value.find((item) => item.id === (summary.value?.projectId ?? currentUser.value?.projectId)) ?? null,
+)
+const currentWorkerName = computed(() => currentWorker.value?.name ?? currentUser.value?.username ?? '未获取')
+const currentTeamName = computed(() => currentTeam.value?.name ?? '未绑定班组')
+const currentProjectName = computed(() => currentProject.value?.name ?? '未绑定项目')
 
 onMounted(async () => {
   loading.value = true
   try {
-    const [summaryRes, ledgerRes] = await Promise.all([getPointSummary(), getPointLedger()])
+    const [profileRes, summaryRes, ledgerRes, projectRes, teamRes, workerRes] = await Promise.all([
+      getCurrentUser(),
+      getPointSummary(),
+      getPointLedger(),
+      getProjects(),
+      getTeams(),
+      getWorkers(),
+    ])
+    currentUser.value = profileRes.data
     summary.value = summaryRes.data
     ledger.value = ledgerRes.data
+    projects.value = projectRes.data
+    teams.value = teamRes.data
+    workers.value = workerRes.data
   } catch (error) {
     showToast(error instanceof Error ? error.message : '加载积分失败')
   } finally {
@@ -29,7 +59,8 @@ onMounted(async () => {
       <section class="summary-card">
         <p class="label">当前可用积分</p>
         <h2>{{ summary?.balance ?? 0 }}</h2>
-        <p class="desc">项目 ID：{{ summary?.projectId ?? '-' }}</p>
+        <p class="desc">当前工人：{{ currentWorkerName }}</p>
+        <p class="desc">项目班组：{{ currentProjectName }} / {{ currentTeamName }}</p>
       </section>
 
       <section class="ledger-list">

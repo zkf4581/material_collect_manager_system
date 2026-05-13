@@ -61,6 +61,10 @@ const filteredTeams = computed(() =>
   teams.value.filter((team) => !form.projectId || String(team.projectId) === form.projectId),
 )
 
+const filteredWorkers = computed(() =>
+  workers.value.filter((worker) => !form.teamId || String(worker.teamId) === form.teamId),
+)
+
 const selectedMaterial = computed(() =>
   materials.value.find((item) => String(item.id) === form.materialItemId),
 )
@@ -76,6 +80,16 @@ watch(
   (nextProjectId, prevProjectId) => {
     if (prevProjectId && nextProjectId !== prevProjectId) {
       form.teamId = ''
+      form.workerId = ''
+    }
+  },
+)
+
+watch(
+  () => form.teamId,
+  (nextTeamId, prevTeamId) => {
+    if (prevTeamId && nextTeamId !== prevTeamId) {
+      form.workerId = ''
     }
   },
 )
@@ -320,7 +334,7 @@ async function onSubmit() {
         <span>工人</span>
         <select v-model="form.workerId">
           <option value="">请选择工人</option>
-          <option v-for="item in workers" :key="item.id" :value="String(item.id)">{{ item.name }}</option>
+          <option v-for="item in filteredWorkers" :key="item.id" :value="String(item.id)">{{ item.name }}</option>
         </select>
       </label>
 

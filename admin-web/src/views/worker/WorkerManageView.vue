@@ -1,14 +1,29 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
-import { createWorker, getWorkers, updateWorker, type WorkerItem } from '@/api/project'
+import {
+  createWorker,
+  getProjects,
+  getTeams,
+  getWorkers,
+  updateWorker,
+  type ProjectItem,
+  type TeamItem,
+  type WorkerItem,
+} from '@/api/project'
 
 const loading = ref(false)
 const saving = ref(false)
 const items = ref<WorkerItem[]>([])
+const projects = ref<ProjectItem[]>([])
+const teams = ref<TeamItem[]>([])
 const editingId = ref<number | null>(null)
 
+const projectMap = computed(() => new Map(projects.value.map((item) => [item.id, item.name])))
+const teamMap = computed(() => new Map(teams.value.map((item) => [item.id, item])))
+
 const form = reactive({
+  teamId: undefined as number | undefined,
   name: '',
   phone: '',
   status: 'ENABLED',
@@ -17,8 +32,10 @@ const form = reactive({
 async function loadData() {
   loading.value = true
   try {
-    const response = await getWorkers()
-    items.value = response.data
+    const [workerRes, projectRes, teamRes] = await Promise.all([getWorkers(), getProjects(), getTeams()])
+    items.value = workerRes.data
+    projects.value = projectRes.data
+    teams.value = teamRes.data
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '加载工人失败')
   } finally {
@@ -28,6 +45,7 @@ async function loadData() {
 
 function fillForm(item: WorkerItem) {
   editingId.value = item.id
+  form.teamId = item.teamId ?? undefined
   form.name = item.name
   form.phone = item.phone || ''
   form.status = item.status
@@ -35,19 +53,30 @@ function fillForm(item: WorkerItem) {
 
 function resetForm() {
   editingId.value = null
+  form.teamId = undefined
   form.name = ''
   form.phone = ''
   form.status = 'ENABLED'
 }
 
 async function onSubmit() {
+  if (!form.teamId) {
+    ElMessage.error('请先选择所属班组')
+    return
+  }
   saving.value = true
   try {
+    const payload = {
+      teamId: form.teamId,
+      name: form.name,
+      phone: form.phone,
+      status: form.status,
+    }
     if (editingId.value) {
-      await updateWorker(editingId.value, { ...form })
+      await updateWorker(editingId.value, payload)
       ElMessage.success('工人更新成功')
     } else {
-      await createWorker({ ...form })
+      await createWorker(payload)
       ElMessage.success('工人创建成功')
     }
     resetForm()
@@ -57,6 +86,17 @@ async function onSubmit() {
   } finally {
     saving.value = false
   }
+}
+
+function getTeamLabel(teamId?: number | null) {
+  if (!teamId) {
+    return '未绑定班组'
+  }
+  const team = teamMap.value.get(teamId)
+  if (!team) {
+    return `班组 #${teamId}`
+  }
+  return `${projectMap.value.get(team.projectId) ?? `项目 #${team.projectId}`} / ${team.name}`
 }
 
 onMounted(loadData)
@@ -77,6 +117,16 @@ onMounted(loadData)
       <el-card shadow="never">
         <template #header><div class="card-title">{{ editingId ? '编辑工人' : '新增工人' }}</div></template>
         <el-form label-position="top">
+          <el-form-item label="所属班组">
+            <el-select v-model="form.teamId" placeholder="请选择班组" filterable>
+              <el-option
+                v-for="item in teams"
+                :key="item.id"
+                :label="getTeamLabel(item.id)"
+                :value="item.id"
+              />
+            </el-select>
+          </el-form-item>
           <el-form-item label="姓名">
             <el-input v-model="form.name" placeholder="请输入工人姓名" />
           </el-form-item>
@@ -101,6 +151,9 @@ onMounted(loadData)
         <el-table :data="items" v-loading="loading" border>
           <el-table-column prop="id" label="ID" width="70" />
           <el-table-column prop="name" label="姓名" min-width="140" />
+          <el-table-column label="所属班组" min-width="220">
+            <template #default="{ row }">{{ getTeamLabel(row.teamId) }}</template>
+          </el-table-column>
           <el-table-column prop="phone" label="手机号" min-width="150" />
           <el-table-column prop="status" label="状态" min-width="100" />
           <el-table-column label="操作" width="100">

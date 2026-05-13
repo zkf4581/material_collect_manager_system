@@ -6,6 +6,7 @@ export interface AdminProfile {
   username: string
   roleCode: string
   projectId: number | null
+  workerId: number | null
 }
 
 export interface LoginPayload {

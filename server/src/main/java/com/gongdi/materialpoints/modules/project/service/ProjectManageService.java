@@ -86,7 +86,9 @@ public class ProjectManageService {
 
     @Transactional
     public Worker createWorker(SaveWorkerCommand command) {
+        ensureTeamExists(command.teamId());
         Worker worker = new Worker();
+        worker.setTeamId(command.teamId());
         worker.setName(command.name());
         worker.setPhone(command.phone());
         worker.setStatus(command.status());
@@ -95,8 +97,10 @@ public class ProjectManageService {
 
     @Transactional
     public Worker updateWorker(Long id, SaveWorkerCommand command) {
+        ensureTeamExists(command.teamId());
         Worker worker = workerRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(40401, "工人不存在"));
+        worker.setTeamId(command.teamId());
         worker.setName(command.name());
         worker.setPhone(command.phone());
         worker.setStatus(command.status());
@@ -109,12 +113,18 @@ public class ProjectManageService {
         }
     }
 
+    private void ensureTeamExists(Long teamId) {
+        if (!teamRepository.existsById(teamId)) {
+            throw new BusinessException(40402, "班组不存在");
+        }
+    }
+
     public record SaveProjectCommand(String name, String location, String status) {
     }
 
     public record SaveTeamCommand(Long projectId, String name, String status) {
     }
 
-    public record SaveWorkerCommand(String name, String phone, String status) {
+    public record SaveWorkerCommand(Long teamId, String name, String phone, String status) {
     }
 }

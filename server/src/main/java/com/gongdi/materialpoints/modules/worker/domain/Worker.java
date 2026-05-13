@@ -21,6 +21,9 @@ public class Worker {
     @Column
     private String phone;
 
+    @Column
+    private Long teamId;
+
     @Column(nullable = false)
     private String status;
 
@@ -42,6 +45,14 @@ public class Worker {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public Long getTeamId() {
+        return teamId;
+    }
+
+    public void setTeamId(Long teamId) {
+        this.teamId = teamId;
     }
 
     public String getStatus() {

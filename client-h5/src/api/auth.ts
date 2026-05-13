@@ -11,6 +11,7 @@ export interface CurrentUser {
   username: string
   roleCode: string
   projectId: number | null
+  workerId: number | null
 }
 
 export interface LoginResponse {

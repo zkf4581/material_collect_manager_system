@@ -28,8 +28,8 @@ class ProjectWorkerManageIntegrationTests {
 
     @BeforeEach
     void setUp() {
-        jdbcTemplate.execute("DELETE FROM team");
         jdbcTemplate.execute("DELETE FROM worker");
+        jdbcTemplate.execute("DELETE FROM team");
         jdbcTemplate.execute("DELETE FROM project");
         jdbcTemplate.execute("DELETE FROM app_user");
 
@@ -118,19 +118,22 @@ class ProjectWorkerManageIntegrationTests {
                         .contentType("application/json")
                         .content("""
                                 {
+                                  "teamId": 21,
                                   "name": "李四",
                                   "phone": "13800000002",
                                   "status": "ENABLED"
                                 }
                                 """))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.name").value("李四"));
+                .andExpect(jsonPath("$.data.name").value("李四"))
+                .andExpect(jsonPath("$.data.teamId").value(21));
 
         mockMvc.perform(put("/api/workers/31")
                         .header("Authorization", "Bearer " + token)
                         .contentType("application/json")
                         .content("""
                                 {
+                                  "teamId": 21,
                                   "name": "张三-更新",
                                   "phone": "13800000009",
                                   "status": "DISABLED"
@@ -138,11 +141,13 @@ class ProjectWorkerManageIntegrationTests {
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.name").value("张三-更新"))
+                .andExpect(jsonPath("$.data.teamId").value(21))
                 .andExpect(jsonPath("$.data.status").value("DISABLED"));
 
         mockMvc.perform(get("/api/workers")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.length()").value(2));
+                .andExpect(jsonPath("$.data.length()").value(2))
+                .andExpect(jsonPath("$.data[0].teamId").value(21));
     }
 }

@@ -16,6 +16,7 @@ export interface TeamItem {
 
 export interface WorkerItem {
   id: number
+  teamId?: number | null
   name: string
   phone?: string
   status: string
@@ -34,6 +35,7 @@ export interface SaveTeamPayload {
 }
 
 export interface SaveWorkerPayload {
+  teamId: number
   name: string
   phone: string
   status: string

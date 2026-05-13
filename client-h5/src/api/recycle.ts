@@ -18,6 +18,7 @@ export interface WorkerOption {
   id: number
   name: string
   phone?: string
+  teamId?: number | null
   status: string
 }
 

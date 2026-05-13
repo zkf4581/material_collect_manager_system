@@ -103,7 +103,7 @@ public class ProjectController {
     ) {
         roleGuard.requireAnyRole(httpServletRequest, "ADMIN");
         return ApiResponse.success(projectManageService.createWorker(
-                new ProjectManageService.SaveWorkerCommand(request.name(), request.phone(), request.status())
+                new ProjectManageService.SaveWorkerCommand(request.teamId(), request.name(), request.phone(), request.status())
         ));
     }
 
@@ -116,7 +116,7 @@ public class ProjectController {
         roleGuard.requireAnyRole(httpServletRequest, "ADMIN");
         return ApiResponse.success(projectManageService.updateWorker(
                 id,
-                new ProjectManageService.SaveWorkerCommand(request.name(), request.phone(), request.status())
+                new ProjectManageService.SaveWorkerCommand(request.teamId(), request.name(), request.phone(), request.status())
         ));
     }
 
@@ -140,6 +140,8 @@ public class ProjectController {
     }
 
     public record SaveWorkerRequest(
+            @NotNull(message = "班组不能为空")
+            Long teamId,
             @NotBlank(message = "工人姓名不能为空")
             String name,
             String phone,

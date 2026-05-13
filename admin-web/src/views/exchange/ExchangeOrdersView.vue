@@ -10,20 +10,36 @@ import {
   type ExchangeOrder,
   type RewardItem,
 } from '@/api/exchange'
+import { getProjects, getTeams, getWorkers, type ProjectItem, type TeamItem, type WorkerItem } from '@/api/project'
 
 const loading = ref(false)
 const processingId = ref<number | null>(null)
 const orders = ref<ExchangeOrder[]>([])
 const rewards = ref<RewardItem[]>([])
+const projects = ref<ProjectItem[]>([])
+const teams = ref<TeamItem[]>([])
+const workers = ref<WorkerItem[]>([])
 
 const rewardMap = computed(() => new Map(rewards.value.map((item) => [item.id, item.name])))
+const projectMap = computed(() => new Map(projects.value.map((item) => [item.id, item.name])))
+const teamMap = computed(() => new Map(teams.value.map((item) => [item.id, item.name])))
+const workerMap = computed(() => new Map(workers.value.map((item) => [item.id, item])))
 
 async function loadData() {
   loading.value = true
   try {
-    const [orderRes, rewardRes] = await Promise.all([getExchangeOrders(), getRewardItems()])
+    const [orderRes, rewardRes, projectRes, teamRes, workerRes] = await Promise.all([
+      getExchangeOrders(),
+      getRewardItems(),
+      getProjects(),
+      getTeams(),
+      getWorkers(),
+    ])
     orders.value = orderRes.data
     rewards.value = rewardRes.data
+    projects.value = projectRes.data
+    teams.value = teamRes.data
+    workers.value = workerRes.data
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '加载兑换审核数据失败')
   } finally {
@@ -70,6 +86,45 @@ async function onDeliver(id: number) {
   }
 }
 
+function getWorkerName(workerId: number) {
+  return workerMap.value.get(workerId)?.name ?? `工人 #${workerId}`
+}
+
+function getWorkerTeamName(workerId: number) {
+  const teamId = workerMap.value.get(workerId)?.teamId
+  if (!teamId) {
+    return '未绑定班组'
+  }
+  return teamMap.value.get(teamId) ?? `班组 #${teamId}`
+}
+
+function getProjectName(projectId: number) {
+  return projectMap.value.get(projectId) ?? `项目 #${projectId}`
+}
+
+function getRewardName(rewardItemId: number) {
+  return rewardMap.value.get(rewardItemId) ?? `商品 #${rewardItemId}`
+}
+
+function getStatusName(status: string) {
+  return (
+    {
+      SUBMITTED: '待审核',
+      APPROVED: '审核通过',
+      REJECTED: '已驳回',
+      DELIVERED: '已发放',
+    }[status] ?? status
+  )
+}
+
+function getStatusType(status: string) {
+  return status === 'APPROVED' || status === 'DELIVERED'
+    ? 'success'
+    : status === 'REJECTED'
+      ? 'danger'
+      : 'warning'
+}
+
 onMounted(loadData)
 </script>
 
@@ -87,19 +142,23 @@ onMounted(loadData)
     <el-table :data="orders" v-loading="loading" border>
       <el-table-column prop="id" label="申请 ID" min-width="90" />
       <el-table-column prop="orderNo" label="订单号" min-width="180" />
-      <el-table-column prop="workerId" label="工人 ID" min-width="90" />
+      <el-table-column label="申请人" min-width="150">
+        <template #default="{ row }">
+          <div class="cell-main">{{ getWorkerName(row.workerId) }}</div>
+          <div class="cell-sub">{{ getWorkerTeamName(row.workerId) }}</div>
+        </template>
+      </el-table-column>
+      <el-table-column label="项目" min-width="220">
+        <template #default="{ row }">{{ getProjectName(row.projectId) }}</template>
+      </el-table-column>
       <el-table-column label="商品" min-width="160">
-        <template #default="{ row }">{{ rewardMap.get(row.rewardItemId) || row.rewardItemId }}</template>
+        <template #default="{ row }">{{ getRewardName(row.rewardItemId) }}</template>
       </el-table-column>
       <el-table-column prop="quantity" label="数量" min-width="80" />
       <el-table-column prop="totalPoints" label="积分" min-width="80" />
       <el-table-column label="状态" min-width="100">
         <template #default="{ row }">
-          <el-tag
-            :type="row.status === 'APPROVED' ? 'success' : row.status === 'REJECTED' ? 'danger' : 'warning'"
-          >
-            {{ row.status }}
-          </el-tag>
+          <el-tag :type="getStatusType(row.status)">{{ getStatusName(row.status) }}</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="操作" width="200" fixed="right">
@@ -160,6 +219,17 @@ h2 {
 .actions {
   display: flex;
   gap: 8px;
+}
+
+.cell-main {
+  color: var(--adm-text);
+  font-weight: 600;
+}
+
+.cell-sub {
+  margin-top: 4px;
+  color: var(--adm-text-muted);
+  font-size: 12px;
 }
 
 .done-text {

@@ -5,10 +5,10 @@ INSERT INTO team (id, project_id, name, status)
 VALUES (11, 1, '钢筋班组', 'ENABLED'),
        (12, 1, '木工班组', 'ENABLED');
 
-INSERT INTO worker (id, name, phone, status)
-VALUES (21, '张三', '13800000001', 'ENABLED'),
-       (22, '李四', '13800000002', 'ENABLED'),
-       (23, '演示工人01', '13800000003', 'ENABLED');
+INSERT INTO worker (id, name, phone, team_id, status)
+VALUES (21, '张三', '13800000001', 11, 'ENABLED'),
+       (22, '李四', '13800000002', 12, 'ENABLED'),
+       (23, '演示工人01', '13800000003', 11, 'ENABLED');
 
 INSERT INTO app_user (id, username, password, role_code, status, project_id, worker_id)
 VALUES (1, 'admin', '{noop}123456', 'ADMIN', 'ENABLED', 1, NULL),
